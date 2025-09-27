@@ -3034,7 +3034,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:^4, @oclif/core@npm:^4.5.3":
+"@oclif/core@npm:^4, @oclif/core@npm:^4.5.4":
   version: 4.5.4
   resolution: "@oclif/core@npm:4.5.4"
   dependencies:
@@ -3070,10 +3070,10 @@ __metadata:
   linkType: hard
 
 "@oclif/plugin-plugins@npm:^5":
-  version: 5.4.47
-  resolution: "@oclif/plugin-plugins@npm:5.4.47"
+  version: 5.4.48
+  resolution: "@oclif/plugin-plugins@npm:5.4.48"
   dependencies:
-    "@oclif/core": ^4.5.3
+    "@oclif/core": ^4.5.4
     ansis: ^3.17.0
     debug: ^4.4.0
     npm: ^10.9.3
@@ -3084,7 +3084,7 @@ __metadata:
     validate-npm-package-name: ^5.0.1
     which: ^4.0.0
     yarn: ^1.22.22
-  checksum: 0c3589bd8becb9e4db10ef3f963a9ed7b79531f6e3a55a57e8690d02b1454ed2c767fe796a228d04713557f78e57f0a328dc8debccc983add7ea2eadc3f6694b
+  checksum: 6cc451e5ebcd5d1c06f8e7d24572c7c44ea1731a5f7b3c01514abce5bb5db2437fb88699833a3aacfe17a38d9b74eb18c3bf8b49086794560a73b546a0ac4e69
   languageName: node
   linkType: hard
 
@@ -3559,6 +3559,7 @@ __metadata:
     eslint-config-next: ~15.2.3
     eslint-config-prettier: ~10.1.1
     eslint-plugin-prettier: ~5.2.4
+    ethers: ^6.15.0
     kubo-rpc-client: ~5.0.2
     next: ~15.2.3
     next-nprogress-bar: ~2.3.13
@@ -4323,6 +4324,24 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: d92c1d3e77406bf13a03ec521b2ffb1ac99b2e6ea3a17cad670f2610f62e1293554c57e4074bb2fd4e9369f475f863b69e0ae8c543cb049c4a3c1b0c2d92522a
+  languageName: node
+  linkType: hard
+
+"@types/react-dom@npm:^19.1.9":
+  version: 19.1.9
+  resolution: "@types/react-dom@npm:19.1.9"
+  peerDependencies:
+    "@types/react": ^19.0.0
+  checksum: 207acb79f6c3c9704938138960e21429efdf2db2184f17c166e8ec3f3180dfe6445b282c5302f559a71b2d09ab2fafef7735f3d24fd01cda4e5c7bf0cea1d5b9
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^19.1.14":
+  version: 19.1.14
+  resolution: "@types/react@npm:19.1.14"
+  dependencies:
+    csstype: ^3.0.2
+  checksum: 6528ca368d3e209fe7c74d466f252e862e4ac3bbd61a414d48421a0e07525635acc927d4a2d5d2dabf8307beb493a0276ef0b3bf51554eaf685c5766461df7ac
   languageName: node
   linkType: hard
 
@@ -6211,11 +6230,11 @@ __metadata:
   linkType: hard
 
 "baseline-browser-mapping@npm:^2.8.3":
-  version: 2.8.7
-  resolution: "baseline-browser-mapping@npm:2.8.7"
+  version: 2.8.8
+  resolution: "baseline-browser-mapping@npm:2.8.8"
   bin:
     baseline-browser-mapping: dist/cli.js
-  checksum: 15a46675aeec236e831644922569863eccb068a1a0131806e91ff0c263bbe6e351825b52cdc6905abf304946997dd8460fd9d3103818ddf4771e2ca0bb3e2de9
+  checksum: d8cd9047549b7b54aed40f15036d9023e77a3919a1eea9db1bad9befb365321ff5bf580d8924de8ddf0022c037feb779f26d14bae4efb1dbc61042f3978d3311
   languageName: node
   linkType: hard
 
@@ -8869,6 +8888,21 @@ __metadata:
     "@ethersproject/web": 5.8.0
     "@ethersproject/wordlists": 5.8.0
   checksum: fb107bf28dc3aedde4729f9553be066c699e0636346c095b4deeb5349a0c0c8538f48a58b5c8cbefced008706919739c5f7b8f4dd506bb471a31edee18cda228
+  languageName: node
+  linkType: hard
+
+"ethers@npm:^6.15.0":
+  version: 6.15.0
+  resolution: "ethers@npm:6.15.0"
+  dependencies:
+    "@adraffy/ens-normalize": 1.10.1
+    "@noble/curves": 1.2.0
+    "@noble/hashes": 1.3.2
+    "@types/node": 22.7.5
+    aes-js: 4.0.0-beta.5
+    tslib: 2.7.0
+    ws: 8.17.1
+  checksum: 3e8fb73b5cf2bef564433442adb68fe89a6da0d664c1ebe6e226fe5e7160da7010800334c3ecc53eef51ff8c10a3255fa99160e8d424f1241440043f6faa2ea1
   languageName: node
   linkType: hard
 
@@ -14922,6 +14956,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "se-2@workspace:."
   dependencies:
+    "@types/react": ^19.1.14
+    "@types/react-dom": ^19.1.9
     husky: ~9.1.6
     lint-staged: ~13.2.2
   languageName: unknown

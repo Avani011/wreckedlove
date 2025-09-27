@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import Nav from "~~/components/Nav";
@@ -41,16 +43,24 @@ const HomePage = () => {
           </div>
 
           {/* Center Hero Section */}
-          <div className="flex flex-col items-center justify-center gap-24 px-32 relative z-20">
+          <div className="flex flex-col items-center justify-center gap-14 px-32 relative z-20">
             <div className="flex flex-col">
               {/* Tagline */}
-              <h1 className="text-6xl font-bold text-blue-600 font-kreon drop-shadow-lg">Wrecked Love</h1>
+              <div className="relative leading-none w-fit">
+                <h1 className="relative z-10 text-7xl text-black font-kranky">Wrecked Love</h1>
+                <h1
+                  aria-hidden="true"
+                  className="absolute inset-0 text-7xl font-bold text-[#55b6ca92] font-kreon translate-x-1 translate-y-1 pointer-events-none"
+                >
+                  Wrecked Love
+                </h1>
+              </div>
               <p>xhshdjedkj</p>
             </div>
             {/* Hero Image Carousel */}
             <div className="relative w-full h-96 flex flex-col">
               <div className="w-full h-full flex items-center justify-center">
-                <Image src="Marriage proposal.svg" alt="hero images" width={500} height={500} />
+                <Image src="Marriage proposal.svg" alt="hero images" width={600} height={600} />
               </div>
               {/* Bottom Arc */}
               <div className=" relative w-full h-full">

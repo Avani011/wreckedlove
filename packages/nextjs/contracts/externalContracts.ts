@@ -1,16 +1,5 @@
-import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
-
-/**
- * @example
- * const externalContracts = {
- *   1: {
- *     DAI: {
- *       address: "0x...",
- *       abi: [...],
- *     },
- *   },
- * } as const;
- */
+// Empty placeholder for projects not using external (pre-deployed) contracts.
+// Keep this file so imports like "~~/contracts/externalContracts" resolve.
 const externalContracts = {} as const;
 
-export default externalContracts satisfies GenericContractsDeclaration;
+export default externalContracts;

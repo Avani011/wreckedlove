@@ -3,6 +3,7 @@
 import React, { ReactNode, useState } from "react";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "react-hot-toast";
 import type { Chain } from "viem";
 import { WagmiProvider, createConfig, http } from "wagmi";
 import { wagmiConnectors } from "~~/services/web3/wagmiConnectors";
@@ -42,7 +43,10 @@ export default function Providers({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig} reconnectOnMount={false}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={React.useMemo(() => darkTheme(), [])}>{children}</RainbowKitProvider>
+        <RainbowKitProvider theme={React.useMemo(() => darkTheme(), [])}>
+          {children}
+          <Toaster position="top-center" />
+        </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 interface NavProps {
   logoText?: string;
@@ -49,6 +50,11 @@ const Nav: React.FC<NavProps> = ({
               </Link>
             );
           })}
+          <ConnectButton
+            chainStatus="icon"
+            showBalance={false}
+            accountStatus={{ smallScreen: "avatar", largeScreen: "full" }}
+          />
         </div>
       </div>
     </nav>

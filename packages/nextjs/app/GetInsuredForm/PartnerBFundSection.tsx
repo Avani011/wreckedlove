@@ -19,6 +19,7 @@ import {
 import WreckedLoveABI from "~~/contracts/WreckedLove.json";
 import { CONTRACT_ADDRESS } from "~~/hooks/contract";
 import scaffoldConfig from "~~/scaffold.config";
+import { notification } from "~~/utils/scaffold-eth";
 
 const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 15557);
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://evm-testnet.flowchain.io";
@@ -76,8 +77,9 @@ export function PartnerBFundSection({
 
 function InnerFund({ poolId, amountEth, tncAccepted }: { poolId: string; amountEth: string; tncAccepted: boolean }) {
   const { address } = useAccount();
-  const { writeContractAsync, data: txHash } = useWriteContract();
+  const { writeContractAsync, data: txHash, isPending } = useWriteContract();
   const { isLoading: isWaiting, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+  const [submitting, setSubmitting] = useState(false);
 
   const canFund = useMemo(
     () => Boolean(tncAccepted && address && poolId && amountEth),
@@ -85,16 +87,24 @@ function InnerFund({ poolId, amountEth, tncAccepted }: { poolId: string; amountE
   );
 
   const fund = async () => {
-    if (!canFund) return;
+    if (!canFund || submitting) return;
+    setSubmitting(true);
     const totalWei = parseEther(amountEth);
     const halfWei = totalWei / 2n;
-    await writeContractAsync({
-      address: CONTRACT_ADDRESS as Address,
-      abi: WreckedLoveABI,
-      functionName: "fundPool",
-      args: [BigInt(poolId)],
-      value: halfWei,
-    });
+    try {
+      await writeContractAsync({
+        address: CONTRACT_ADDRESS as Address,
+        abi: WreckedLoveABI,
+        functionName: "fundPool",
+        args: [BigInt(poolId)],
+        value: halfWei,
+      });
+    } catch (err: any) {
+      const message = err?.shortMessage || err?.message || "Transaction rejected";
+      notification.error(message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -107,17 +117,17 @@ function InnerFund({ poolId, amountEth, tncAccepted }: { poolId: string; amountE
       />
       <button
         onClick={fund}
-        disabled={!canFund}
+        disabled={!canFund || submitting || isPending || isWaiting}
         className={`w-full px-8 py-4 rounded-xl font-bold shadow-lg transition-all duration-200 text-lg ${
           canFund
             ? "bg-gradient-to-r from-yellow-400 to-yellow-300 hover:from-yellow-500 hover:to-yellow-400 text-black"
             : "bg-gray-300 text-gray-500 cursor-not-allowed"
         }`}
       >
-        Fund Pool (Partner B)
+        {isPending || isWaiting || submitting ? "Funding..." : "Fund Pool (Partner B)"}
       </button>
-      {isWaiting && <p className="text-sm text-gray-600">Partner B transaction pending…</p>}
-      {isSuccess && <p className="text-sm text-green-600">Partner B funded successfully.</p>}
+      {isWaiting && <p className="text-sm text-black">Partner B transaction pending...</p>}
+      {isSuccess && <p className="text-sm text-black">Partner B funded successfully.</p>}
     </div>
   );
 }

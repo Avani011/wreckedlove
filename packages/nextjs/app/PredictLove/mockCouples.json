@@ -1,0 +1,24 @@
+[
+  {
+    "id": "1",
+    "partner1": "Alice",
+    "partner2": "Bob",
+    "relationshipPeriod": "2 years",
+    "insuranceTenure": "1 year",
+    "socials": [
+      { "type": "twitter", "url": "https://twitter.com/alice" },
+      { "type": "instagram", "url": "https://instagram.com/bob" }
+    ]
+  },
+  {
+    "id": "2",
+    "partner1": "Charlie",
+    "partner2": "Dana",
+    "relationshipPeriod": "3 years",
+    "insuranceTenure": "2 years",
+    "socials": [
+      { "type": "facebook", "url": "https://facebook.com/charlie" },
+      { "type": "linkedin", "url": "https://linkedin.com/in/dana" }
+    ]
+  }
+]

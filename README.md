@@ -1,80 +1,65 @@
-# 🏗 Scaffold-ETH 2
+# 💔 Wrecked Love
+**Tagline:** *Where love goes liquid*  
 
-<h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Documentation</a> |
-  <a href="https://scaffoldeth.io">Website</a>
-</h4>
+The first on-chain **Love Insurance + Gossip Prediction Market**.  
+Couples lock funds as proof of loyalty, the community bets on their relationship, and everyone either survives… or gets wrecked.  
 
-🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
+---
 
-⚙️ Built using NextJS, RainbowKit, Hardhat, Wagmi, Viem, and Typescript.
+## 🚀 Overview
+**Wrecked Love** is a playful yet powerful consumer dApp that merges:  
+- **Insurance Pools** → Couples deposit 50–50 funds into a pool with a fixed tenure.  
+- **Prediction Markets** → Community bets (Yes/No) on gossip posts tied to couples.  
+- **Settlement Layer** → Pools mature; bets resolve based on outcomes.  
 
-- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
-- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
-- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
-- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
-- 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
+It’s DeFi meets Gen-Z culture. Gossip, memes, and heartbreaks turned into crypto-native primitives.  
 
-![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
+---
 
-## Requirements
+## 🔑 Features
+- 👫 **Couple Insurance Pools** – Equal deposits, survive & earn yield, or split & one gets wrecked.  
+- 📱 **Prediction Markets** – Bet on gossip tied to couples.  
+- ⏳ **24-Hour Betting Window** – Bets open for only 1 day after creation.  
+- 📦 **No Heavy Backend** – On-chain logic + Filecoin/IPFS storage.  
+- 🪙 **Protocol Revenue** – Small fees on pools & bets.  
+- 🖼 **NFT Badges (Future)** – Couples & bettors earn meme badges as proof of survival/degeneracy.  
 
-Before you begin, you need to install the following tools:
+---
 
-- [Node (>= v20.18.3)](https://nodejs.org/en/download/)
-- Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
-- [Git](https://git-scm.com/downloads)
+## 🏗 Tech Stack
+- **Frontend** → [Next.js](https://nextjs.org/) + TailwindCSS  
+- **Wallet/Auth** → [Privy](https://www.privy.io/) (embedded wallets, social logins)  
+- **Smart Contracts** → Solidity on [Flow EVM](https://flow.com/)  
+- **Storage** → Filecoin/IPFS for gossip posts/media  
+- **MiniApp Ready** → Deployed as World Mini App for hackathon demo  
 
-## Quickstart
+---
 
-To get started with Scaffold-ETH 2, follow the steps below:
+## 📜 Smart Contracts
+Main contract: `WreckedLove.sol`  
+- Pool creation & funding  
+- Admin-created bets (official + gossip)  
+- Yes/No staking with ETH  
+- 24-hour cutoff for bets  
 
-1. Install dependencies if it was skipped in CLI:
+**Deployed on Flow EVM (Testnet):**  
+👉 `0x4ab500E761aF74F1de333a16338942Fd93eb94a3`  
 
-```
-cd my-dapp-example
-yarn install
-```
+---
 
-2. Run a local network in the first terminal:
+## 📂 Project Structure
+```text
+/contracts
+  └── WreckedLove.sol        # Core Solidity contract
 
-```
-yarn chain
-```
+/nextjs-app
+  /app
+    ├── page.tsx             # Landing page
+    ├── pool/[id].tsx        # Pool detail
+    ├── bet/[id].tsx         # Bet detail
+  /components                # UI components
+  /hooks/useWreckedLove.ts   # Contract interaction hook
+  /lib/contract.ts           # ethers.js contract instance
 
-This command starts a local Ethereum network using Hardhat. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `packages/hardhat/hardhat.config.ts`.
-
-3. On a second terminal, deploy the test contract:
-
-```
-yarn deploy
-```
-
-This command deploys a test smart contract to the local network. The contract is located in `packages/hardhat/contracts` and can be modified to suit your needs. The `yarn deploy` command uses the deploy script located in `packages/hardhat/deploy` to deploy the contract to the network. You can also customize the deploy script.
-
-4. On a third terminal, start your NextJS app:
-
-```
-yarn start
-```
-
-Visit your app on: `http://localhost:3000`. You can interact with your smart contract using the `Debug Contracts` page. You can tweak the app config in `packages/nextjs/scaffold.config.ts`.
-
-Run smart contract test with `yarn hardhat:test`
-
-- Edit your smart contracts in `packages/hardhat/contracts`
-- Edit your frontend homepage at `packages/nextjs/app/page.tsx`. For guidance on [routing](https://nextjs.org/docs/app/building-your-application/routing/defining-routes) and configuring [pages/layouts](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts) checkout the Next.js documentation.
-- Edit your deployment scripts in `packages/hardhat/deploy`
-
-
-## Documentation
-
-Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building with Scaffold-ETH 2.
-
-To know more about its features, check out our [website](https://scaffoldeth.io).
-
-## Contributing to Scaffold-ETH 2
-
-We welcome contributions to Scaffold-ETH 2!
-
-Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-ETH 2.
+/abi
+  └── WreckedLove.json       # Compiled ABI

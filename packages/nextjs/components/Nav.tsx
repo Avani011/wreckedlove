@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import WalletButton from "./WalletButton";
 
 interface NavProps {
   logoText?: string;
@@ -25,20 +25,20 @@ const Nav: React.FC<NavProps> = ({
   ],
 }) => {
   return (
-    <nav className="px-6 py-6">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <nav className="w-full py-4">
+      <div className="w-full max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Logo Section */}
         <div className="flex items-center">
           <Link
             href={logoHref}
-            className="text-white text-2xl font-bold hover:text-purple-300 transition-colors duration-200 font-kreon"
+            className="text-black text-2xl font-bold hover:text-purple-700 transition-colors duration-200 font-kreon"
           >
             {logoText}
           </Link>
         </div>
 
         {/* Tabs Section */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3 md:gap-6">
           {tabs.map((tab, index) => {
             return (
               <Link
@@ -50,11 +50,7 @@ const Nav: React.FC<NavProps> = ({
               </Link>
             );
           })}
-          <ConnectButton
-            chainStatus="icon"
-            showBalance={false}
-            accountStatus={{ smallScreen: "avatar", largeScreen: "full" }}
-          />
+          <WalletButton />
         </div>
       </div>
     </nav>

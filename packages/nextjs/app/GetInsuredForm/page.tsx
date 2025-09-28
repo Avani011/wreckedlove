@@ -1,28 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { PartnerBFundSection } from "./PartnerBFundSection";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 /* eslint-disable @next/next/no-img-element */
-import { type Address, isAddress, parseEther } from "viem";
-import { useAccount, useWriteContract } from "wagmi";
+import { type Abi, type Address, type Hex, isAddress, parseEther, parseEventLogs } from "viem";
+import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import WreckedLoveABI from "~~/contracts/WreckedLove.json";
-
-const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!; // Replace with your deployed contract address
+import { CONTRACT_ADDRESS } from "~~/hooks/contract";
 
 type Friend = { name: string; contact: string; social: string; type: string };
-type Pool = {
-  id: bigint;
-  partnerA: string;
-  partnerB: string;
-  totalAmount: bigint;
-  status: number; // 0: Pending, 1: Active, etc.
-};
+// note: pool type no longer used in this component
 
 export default function GetInsuredForm() {
-  const router = useRouter();
   const [step, setStep] = useState(1);
 
   // Step 1: Personal Details
@@ -52,14 +43,25 @@ export default function GetInsuredForm() {
 
   // Loader popup
   const [pendingMsg, setPendingMsg] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [createTxHash, setCreateTxHash] = useState<Hex | undefined>(undefined);
+  const [newPoolId, setNewPoolId] = useState<bigint | null>(null);
+  const [isPartnerBModalOpen, setPartnerBModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Progress bar calculation
   const progress = ((step - 1) / 2) * 100;
 
   // Wagmi hooks for wallet connection
-  const { address: connectedAddress, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const { writeContractAsync } = useWriteContract();
+  const {
+    isLoading: isWaitingCreate,
+    isSuccess: created,
+    data: receipt,
+  } = useWaitForTransactionReceipt({
+    hash: createTxHash,
+  });
 
   // Social link handlers
   const handleSocialChange = (partner: "A" | "B", idx: number, value: string) => {
@@ -83,46 +85,65 @@ export default function GetInsuredForm() {
     setFriends(friends => friends.map((f, i) => (i === idx ? { ...f, [field]: value } : f)));
   };
 
-  // --- Pool logic for Partner B ---
-  // Read pools for connected wallet as partnerB and status Pending
-  const [pendingPool, setPendingPool] = useState<Pool | null>(null);
-
-  useEffect(() => {
-    async function fetchPendingPool() {
-      // You need to implement this using wagmi's useReadContract or your own backend
-      // For demo, we'll assume a function getPendingPool(address) returns the pool
-      // Replace with actual contract read logic
-      // Example:
-      // const pool = await contract.getPendingPool(connectedAddress);
-      // setPendingPool(pool);
-      // For now, leave as null or mock
-      setPendingPool(null);
-    }
-    if (connectedAddress) fetchPendingPool();
-  }, [connectedAddress]);
+  // Partner B handled via modal after create
 
   // Create Pool (Partner A)
   const handleCreatePool = async () => {
     if (!isConnected) return alert("Connect wallet first!");
     if (!partnerAName || !partnerBName || !amountEth || !tenure) return alert("Fill all fields!");
+    if (!isAddress(partnerBWallet as Address)) return alert("Enter a valid Partner B address.");
     try {
-      setPendingMsg("Waiting for wallet...");
+      if (submitting) return;
+      setSubmitting(true);
+      setPendingMsg("Confirm transaction in wallet...");
       const totalAmountWei = parseEther(amountEth);
-      await writeContractAsync({
-        address: CONTRACT_ADDRESS,
+      if (totalAmountWei % 2n !== 0n) {
+        setSubmitting(false);
+        setPendingMsg(null);
+        return alert("Please enter an amount with an even wei value so both halves are equal.");
+      }
+      const hash = await writeContractAsync({
+        address: CONTRACT_ADDRESS as Address,
         abi: WreckedLoveABI,
         functionName: "createPool",
         args: [partnerBWallet as Address, tenure, totalAmountWei],
         value: totalAmountWei / 2n,
       });
-      setPendingMsg(null);
-      setSuccess(true);
-      setTimeout(() => router.push("/PredictLove"), 1500);
+      setCreateTxHash(hash as Hex);
+      setPendingMsg("Transaction sent. Waiting for confirmation...");
     } catch (err) {
-      setPendingMsg(null);
       alert("Transaction failed: " + (err as Error).message);
+      setPendingMsg(null);
+    } finally {
+      setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (!created || !receipt) return;
+    try {
+      const events = parseEventLogs({
+        abi: WreckedLoveABI as unknown as Abi,
+        logs: receipt.logs,
+        eventName: "PoolCreated",
+      });
+      const poolId = (events?.[0]?.args as any)?.poolId as bigint | undefined;
+      if (poolId != null) {
+        setNewPoolId(poolId);
+        setPendingMsg(null);
+        // Copy share link for Partner B
+        const link = typeof window !== "undefined" ? `${window.location.origin}/pool/${poolId}` : `/pool/${poolId}`;
+        if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+          navigator.clipboard.writeText(link).catch(() => {});
+        }
+        setStep(3); // stay on step 3
+        setPartnerBModalOpen(true); // open Partner B modal
+      }
+    } catch {
+      // fallback: still clear pending
+      setPendingMsg(null);
+    }
+  }, [created, receipt]);
 
   return (
     <>
@@ -144,7 +165,6 @@ export default function GetInsuredForm() {
                 <span>Insurance</span>
               </div>
             </div>
-
             {/* Step 1: Personal Details */}
             {step === 1 && (
               <div className="flex flex-col gap-4">
@@ -257,7 +277,6 @@ export default function GetInsuredForm() {
                 </div>
               </div>
             )}
-
             {/* Step 2: Friends */}
             {step === 2 && (
               <div className="flex flex-col gap-4">
@@ -320,7 +339,6 @@ export default function GetInsuredForm() {
                 </div>
               </div>
             )}
-
             {/* Step 3: Insurance Details */}
             {step === 3 && (
               <div className="flex flex-col gap-4">
@@ -354,23 +372,66 @@ export default function GetInsuredForm() {
                 <div className="flex flex-col md:flex-row gap-4 mt-4">
                   <div className="flex-1 flex flex-col items-center">
                     <span className="mb-2 font-semibold text-gray-800 text-kreon">Partner A</span>
-                    <ConnectButton />
+                    <ConnectButton
+                      label="Connect Partner A"
+                      chainStatus="icon"
+                      showBalance={false}
+                      accountStatus={{ smallScreen: "avatar", largeScreen: "full" }}
+                    />
                     <button
                       className="mt-2 px-6 py-2 rounded-xl font-bold bg-pink-500 text-white hover:bg-pink-600 transition text-kreon"
                       onClick={handleCreatePool}
-                      disabled={!isConnected || !amountEth || !isAddress(partnerBWallet as Address)}
+                      disabled={
+                        submitting ||
+                        isWaitingCreate ||
+                        !isConnected ||
+                        !amountEth ||
+                        !isAddress(partnerBWallet as Address)
+                      }
                     >
-                      Create Pool
+                      {submitting || isWaitingCreate ? "Creating..." : "Create Pool"}
                     </button>
+                    {newPoolId != null && (
+                      <div className="mt-3 text-sm text-center">
+                        <div className="font-semibold">Share with Partner B</div>
+                        <div className="break-all text-black">
+                          {typeof window !== "undefined"
+                            ? `${window.location.origin}/pool/${newPoolId}`
+                            : `/pool/${newPoolId}`}
+                        </div>
+                        <div className="mt-2 flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setPartnerBModalOpen(true)}
+                            className="px-4 py-2 rounded-lg bg-gray-200 text-black font-semibold hover:bg-gray-300 transition"
+                          >
+                            Open Partner B Panel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (newPoolId == null) return;
+                              const link =
+                                typeof window !== "undefined"
+                                  ? `${window.location.origin}/pool/${newPoolId}`
+                                  : `/pool/${newPoolId}`;
+                              if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+                                navigator.clipboard
+                                  .writeText(link)
+                                  .then(() => setCopied(true))
+                                  .catch(() => {});
+                                setTimeout(() => setCopied(false), 1200);
+                              }
+                            }}
+                            className="px-4 py-2 rounded-lg bg-gray-200 text-black font-semibold hover:bg-gray-300 transition"
+                          >
+                            {copied ? "Copied!" : "Copy Link"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex-1 flex flex-col items-center">
-                    <span className="mb-2 font-semibold text-gray-800 text-kreon">Partner B</span>
-                    <PartnerBFundSection
-                      poolId={pendingPool ? pendingPool.id.toString() : ""}
-                      amountEth={amountEth}
-                      tncAccepted={true}
-                    />
-                  </div>
+                  {/* Partner B inline panel removed; use modal instead */}
                 </div>
                 <div className="flex justify-between mt-4">
                   <button
@@ -382,26 +443,38 @@ export default function GetInsuredForm() {
                 </div>
               </div>
             )}
-
             {/* Loader Popup */}
             {pendingMsg && (
               <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                 <div className="bg-white rounded-2xl p-8 w-11/12 sm:w-[28rem] text-center flex flex-col items-center text-kreon">
                   <span className="animate-spin h-10 w-10 mb-4 border-4 border-pink-400 border-t-transparent rounded-full inline-block" />
-                  <p className="text-lg font-medium text-gray-900">{pendingMsg}</p>
+                  <p className="text-lg font-medium text-black">{pendingMsg}</p>
                 </div>
               </div>
             )}
-
-            {/* Success Popup */}
-            {success && (
-              <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                <div className="bg-white rounded-2xl p-8 w-11/12 sm:w-[28rem] text-center flex flex-col items-center text-kreon">
-                  <div className="text-4xl mb-2">✅</div>
-                  <p className="text-lg font-semibold text-gray-900">Success! Redirecting…</p>
+            {/* Partner B Modal */}
+            {isPartnerBModalOpen && newPoolId != null && (
+              <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                <div className="bg-white text-black rounded-2xl p-6 w-11/12 sm:w-[32rem] shadow-xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold">Partner B Funding</h3>
+                    <button
+                      onClick={() => setPartnerBModalOpen(false)}
+                      className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300"
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <p className="mb-3 text-sm">
+                    Ask Partner B to connect their wallet and fund the remaining half to activate the pool.
+                  </p>
+                  <div>
+                    <PartnerBFundSection poolId={newPoolId.toString()} amountEth={amountEth} tncAccepted={true} />
+                  </div>
                 </div>
               </div>
             )}
+            {/* Success Popup */}\n {/* Success popup removed */}\n{" "}
           </div>
         </div>
         {/* Right: Images and Decoration */}
